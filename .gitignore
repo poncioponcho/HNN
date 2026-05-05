@@ -33,20 +33,3 @@ venv/
 # OS
 .DS_Store
 Thumbs.db
-
-# ML/AI specific
-*.pt
-*.pth
-*.h5
-*.hdf5
-wandb/
-mlruns/
-
-# Experiment logs
-*.log
-logs/
-
-# Temporary files
-*.tmp
-*.temp
-~*
