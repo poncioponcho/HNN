@@ -275,7 +275,6 @@ def train_models(dataset: Dict[str, torch.Tensor], args) -> Tuple[Dict, Dict]:
     return results
 
 
-@torch.no_grad()
 def evaluate_rollout(results: Dict, dataset: Dict, args, output_dir: Path):
     """
     长期 rollout 评估：对比 HNN 和 Baseline 的能量守恒性
@@ -283,6 +282,9 @@ def evaluate_rollout(results: Dict, dataset: Dict, args, output_dir: Path):
     这是整个实验最关键的部分！用于验证：
       - HNN 是否能保持能量近似守恒
       - BaselineNN 的能量是否发散
+
+    注意：对于 HNN，rollout 过程中需要 autograd 来计算动力学！
+          因此不能使用 @torch.no_grad()。
     """
     print("\n" + "=" * 60)
     print("Step 3: 长期 Rollout 评估")
@@ -349,8 +351,8 @@ def evaluate_rollout(results: Dict, dataset: Dict, args, output_dir: Path):
         evaluation_results['true_energies'].append(true_energy)
 
         if len(evaluation_results['trajectories']) < 1:  # 只保存第一条轨迹用于可视化
-            evaluation_results['trajectories']['hnn'] = traj_hnn.numpy()[..., 0, :]
-            evaluation_results['trajectories']['baseline'] = traj_baseline.numpy()[..., 0, :]
+            evaluation_results['trajectories']['hnn'] = traj_hnn.detach().numpy()[..., 0, :]
+            evaluation_results['trajectories']['baseline'] = traj_baseline.detach().numpy()[..., 0, :]
 
     # 计算平均能量漂移
     hnn_drifts = []

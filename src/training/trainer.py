@@ -214,13 +214,16 @@ class Trainer:
         avg_loss = total_loss / max(n_batches, 1)
         return avg_loss
 
-    @torch.no_grad()
     def validate(
             self,
             val_loader: DataLoader
     ) -> float:
         """
         验证模型性能
+
+        注意：对于 HNN，不能使用 @torch.no_grad()，
+        因为 loss 函数内部需要通过 autograd 计算梯度！
+        这是 HNN 与普通 NN 的关键区别。
 
         Args:
             val_loader: 验证数据的 DataLoader
@@ -236,7 +239,11 @@ class Trainer:
             coords = coords.to(self.device)
             dcoords_dt = dcoords_dt.to(self.device)
 
-            loss = self.loss_fn(self.model, coords, dcoords_dt)
+            # 对于 HNN: 不能用 torch.no_grad()，需要 autograd
+            # 对于 Baseline: 可以用 torch.no_grad() 加速
+            # 这里统一不使用，保证兼容性
+            with torch.enable_grad():
+                loss = self.loss_fn(self.model, coords, dcoords_dt)
             total_loss += loss.item()
             n_batches += 1
 
@@ -246,9 +253,9 @@ class Trainer:
     def train(
             self,
             train_coords: torch.Tensor,
-            train_dcoords: torch.Tensor,
+            train_dcoords_dt: torch.Tensor,
             val_coords: torch.Tensor,
-            val_dcoords: torch.Tensor,
+            val_dcoords_dt: torch.Tensor,
             verbose: bool = True
     ) -> Dict[str, List[float]]:
         """
