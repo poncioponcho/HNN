@@ -33,3 +33,10 @@ venv/
 # OS
 .DS_Store
 Thumbs.db
+
+# Private documents (面试策略、个人笔记等)
+*story*.md
+*面试*.md
+*笔记*.md
+*指南*.md
+*.private.md
