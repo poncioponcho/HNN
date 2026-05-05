@@ -1,0 +1,42 @@
+# Task 4: Two-Body Problem
+# 论文 Section 4.4, Figure 4
+# 哈密顿量: H = |p_CM|^2/(m1+m2) + (|p1|^2+|p2|^2)/(2*mu) - g*m1*m2/|q1-q2|
+
+# Physics parameters
+physics:
+  m1: 1.0         # 物体1质量
+  m2: 1.0         # 物体2质量
+  g: 1.0          # 引力常数
+
+# Data generation
+data:
+  n_trajectories: 1000      # 论文: 1000 条轨迹
+  n_observations: 50        # 论文: 每条 50 个观测点
+  radius_range: [0.5, 1.5]  # 近圆轨道半径范围
+  noise_std: 0.05           # 速度噪声 sigma=0.05
+  dt: 0.1
+  t_max: 5.0
+  train_ratio: 0.8          # 80/20 训练/测试划分
+
+# Model architecture (8维相空间: q1x,q1y,q2x,q2y,p1x,p1y,p2x,p2y)
+model:
+  input_dim: 8              # (q1, q2, p1, p2) 各2维
+  hidden_dim: 200
+  n_layers: 3
+  activation: tanh
+  output_dim: 1
+
+# Training
+training:
+  learning_rate: 1.0e-3
+  optimizer: adam
+  batch_size: 64
+  n_steps: 10000            # 论文: 训练 10k steps
+  seed: 42
+
+# Evaluation
+evaluation:
+  rollout_steps: 300
+  integrator: RK45
+  rtol: 1.0e-9
+  atol: 1.0e-9

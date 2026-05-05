@@ -1,0 +1,36 @@
+# Task 3: Real Pendulum (Schmidt & Lipson dataset)
+# 论文 Section 4.3, Figure 3
+# 使用真实实验数据，无需解析哈密顿量
+
+# Data source
+data:
+  dataset_name: schmidt_lipson
+  raw_data_path: ./data/raw/schmidt_lipson_pendulum.csv
+  processed_data_path: ./data/processed/pendulum_real.pt
+  # Schmidt & Lipson 数据集包含角度和角速度的观测
+  # 列: theta, theta_dot
+  input_columns: [theta, theta_dot]
+  normalize: true
+
+# Model architecture
+model:
+  input_dim: 2              # (q, p) = (theta, theta_dot)
+  hidden_dim: 200
+  n_layers: 3
+  activation: tanh
+  output_dim: 1
+
+# Training
+training:
+  learning_rate: 1.0e-3
+  optimizer: adam
+  batch_size: 64
+  n_epochs: 2000
+  seed: 42
+
+# Evaluation
+evaluation:
+  rollout_steps: 200
+  integrator: RK45
+  rtol: 1.0e-9
+  atol: 1.0e-9

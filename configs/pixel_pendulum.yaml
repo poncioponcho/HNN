@@ -1,0 +1,59 @@
+# Task 5: Pixel Pendulum (Autoencoder + HNN joint training)
+# 论文 Section 5, Figure 5 & 6
+# 输入: 两帧拼接的像素 (28x28x2), latent: z_q + z_p
+
+# Environment
+environment:
+  env_name: Pendulum-v0     # OpenAI Gym 环境 (gym==0.21.0)
+  max_angle: 0.5236         # pi/6 ≈ 0.5236 rad, 限制最大角度
+  max_speed: 8.0            # Gym 默认最大角速度
+
+# Data generation
+data:
+  n_trajectories: 200       # 论文: 200 条轨迹
+  n_frames: 100             # 论文: 每条 100 帧
+  image_size: 28            # 28x28 像素
+  n_channels: 2             # 两帧拼接
+  dt: 0.05                  # Gym 默认时间步
+
+# Autoencoder architecture (论文: 4层FC + ReLU + 残差连接)
+autoencoder:
+  input_dim: 1568           # 28 * 28 * 2 = 1568
+  hidden_dim: 200
+  n_layers: 4
+  activation: relu
+  latent_dim: 2             # 必须为偶数! 前半 z_q, 后半 z_p
+
+# HNN in latent space
+hnn:
+  input_dim: 2              # = latent_dim
+  hidden_dim: 200
+  n_layers: 3
+  activation: tanh
+  output_dim: 1
+
+# Training
+training:
+  # Stage 1: 预训练 Autoencoder
+  ae_learning_rate: 1.0e-3
+  ae_n_steps: 5000          # 论文: 预训练 5k steps
+
+  # Stage 2: 联合训练 AE + HNN
+  joint_learning_rate: 1.0e-3
+  joint_n_steps: 5000       # 论文: 联合训练 5k steps
+
+  # Loss weights
+  lambda_ae: 1.0            # AE 重建损失权重
+  lambda_hnn: 1.0           # HNN 损失权重
+  lambda_cc: 0.1            # CC 辅助损失权重 (论文默认较小)
+
+  optimizer: adam
+  batch_size: 64
+  seed: 42
+
+# Evaluation
+evaluation:
+  rollout_steps: 100
+  integrator: RK45
+  rtol: 1.0e-9
+  atol: 1.0e-9

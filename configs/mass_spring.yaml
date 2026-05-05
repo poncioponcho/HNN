@@ -1,0 +1,40 @@
+# Task 1: Ideal Mass-Spring
+# 论文 Section 4.1, Figure 1
+# 哈密顿量: H = 0.5 * k * q^2 + p^2 / (2m)
+
+# Physics parameters
+physics:
+  k: 1.0          # 弹簧常数
+  m: 1.0          # 质量
+
+# Data generation
+data:
+  n_trajectories: 25       # 轨迹数量
+  n_observations: 30       # 每条轨迹的观测点数
+  energy_range: [0.2, 1.0] # 总能量均匀采样范围
+  noise_std: 0.1           # 高斯噪声标准差
+  dt: 0.1                  # 时间步长
+  t_max: 3.0               # 最大模拟时间
+
+# Model architecture (论文: 3层, 200隐单元, tanh)
+model:
+  input_dim: 2              # (q, p)
+  hidden_dim: 200
+  n_layers: 3
+  activation: tanh
+  output_dim: 1             # HNN 输出标量 H
+
+# Training
+training:
+  learning_rate: 1.0e-3
+  optimizer: adam
+  batch_size: 64
+  n_epochs: 2000
+  seed: 42
+
+# Evaluation
+evaluation:
+  rollout_steps: 200        # 长期 rollout 步数
+  integrator: RK45
+  rtol: 1.0e-9
+  atol: 1.0e-9
